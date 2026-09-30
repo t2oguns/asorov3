@@ -6,8 +6,22 @@ from django.db import models
 # It includes fields for the lemma (the canonical form of the word)
 
 class Lexeme(models.Model):
-    lemma = models.CharField(max_length=255)
-    normalized_lemma = models.CharField(max_length=255)
+    class PartOfSpeech(models.TextChoices):
+        NOUN = 'NOUN', 'Noun';VERB = 'VERB', 'Verb';ADJECTIVE = 'ADJECTIVE', 'Adjective'
+        ADVERB = 'ADVERB', 'Adverb';PREPOSITION = 'PREPOSITION', 'Preposition'
+        CONJUNCTION = 'CONJUNCTION', 'Conjunction';INTERJECTION = 'INTERJECTION', 'Interjection'
+        PRONOUN = 'PRONOUN', 'Pronoun';INTERROGATIVE = 'INTERROGATIVE', 'Interrogative' 
+        OTHER = 'OTHER', 'Other'
+
+    surface_form = models.CharField(max_length=100, db_index=True)
+    base_consonants = models.CharField(max_length=100, db_index=True)
+
+    pos = models.CharField(
+        max_length=20,
+        choices=PartOfSpeech.choices,
+        default=PartOfSpeech.OTHER, 
+        db_index=True
+    )
 
     tone_pattern = models.CharField(max_length=255) # Possibly Expendable
 
@@ -17,8 +31,11 @@ class Lexeme(models.Model):
 
     frequency_rank = models.IntegerField(
         null=True,
-        blank=True
+        blank=True, 
+        db_index=True
     )
+
+    # embedding = VectorField(dimensions=768, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -31,13 +48,4 @@ class Lexeme(models.Model):
 # This model represents a variant of a lexeme, which can include different forms of the word
 # E.g the verb ni can be the preoposition "in" or can be the verb "to be"
 
-class PartOfSpeech(models.TextChoices):
-    NOUN = 'NOUN', 'Noun'
-    VERB = 'VERB', 'Verb'
-    ADJECTIVE = 'ADJECTIVE', 'Adjective'
-    ADVERB = 'ADVERB', 'Adverb'
-    PREPOSITION = 'PREPOSITION', 'Preposition'
-    CONJUNCTION = 'CONJUNCTION', 'Conjunction'
-    INTERJECTION = 'INTERJECTION', 'Interjection'
-    PRONOUN = 'PRONOUN', 'Pronoun'
-    OTHER = 'OTHER', 'Other'
+
