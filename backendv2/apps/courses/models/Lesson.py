@@ -9,11 +9,11 @@ class PUBLISH_STATUS(models.TextChoices):
     DRAFT ="draft", "Draft"
     GENERATED ="generated", "Generated"
     IN_REVIEW ="in_review", "In Review"
-    PUBLISHED    ="published" "Published"
+    PUBLISHED    ="published", "Published"
     ARCHIVED ="archived", "Archived"
 
 
-class LessonGroup(models.Model):
+class Module(models.Model):
     """
     Optional grouping of lessons inside a unit.
     Example:
@@ -22,18 +22,17 @@ class LessonGroup(models.Model):
     - "Part 1 + Part 2"
     """
 
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="lesson_groups")
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="modules")
     title = models.CharField(max_length=200)
     order = models.PositiveIntegerField()
 
     def __str__(self):
-        return str("Lesson Group - " + self.title)
+        return str("Module - " + self.title)
 
 
 class Lesson(models.Model):
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name="lessons")
-
-    group = models.ForeignKey(LessonGroup, null=True, blank=True, on_delete=models.CASCADE, related_name="lessons")
+    module = models.ForeignKey(Module, null=True, blank=True, on_delete=models.CASCADE, related_name="lessons")
+    
     title = models.CharField(max_length=200)
     code = models.CharField(max_length=LESSON_ID_LENGTH, unique=True, editable=False)
     description = models.TextField(blank=True)
@@ -46,7 +45,7 @@ class Lesson(models.Model):
         default=PUBLISH_STATUS.DRAFT,
     )
 
-    # Ordering for lessons within a group.
+    # Ordering for lessons within a module.
     order = models.PositiveIntegerField()
 
 
@@ -72,7 +71,7 @@ class Lesson(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["unit", "group", "order"],
+                fields=["module", "order"],
                 name="unique_lesson_order"
             )
         ]

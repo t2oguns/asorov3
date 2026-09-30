@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import Construction, ConstructionComponent, Highlight, ConstructionLexeme
+from .models import Construction, ConstructionComponent, Highlight
 from apps.vocabulary.models import Lexeme
 
 
 class LexemeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lexeme
-        fields = ["id", "lemma", "normalized_lemma", "tone_pattern", "translation"]
+        fields = ["id", "native_text", "normalized_text", "pos","tone_pattern", "translation", "notes"]
 
 
 class HighlightSerializer(serializers.ModelSerializer):

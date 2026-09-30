@@ -17,6 +17,9 @@ class UserLessonProgress(models.Model):
     def __str__(self):
         return str(str(self.user.display_name) + " - " + str(self.lesson))
 
+    class Meta:
+        unique_together = ("user", "lesson")
+
 # Tracks the progress of a user with respect to a specific lexeme.
 class UserLexemeProgress(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)

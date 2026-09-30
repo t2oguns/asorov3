@@ -1,2 +1,2 @@
-from .Lesson import Lesson, LessonGroup
+from .Lesson import Lesson, Module
 from .Unit import Unit

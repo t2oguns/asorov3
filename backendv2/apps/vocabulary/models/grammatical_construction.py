@@ -11,7 +11,7 @@ class ConstructionType(models.TextChoices):
     PHRASE = 'Phrase'
     SENTENCE = 'Sentence'
 
-class ComponentDifficulty(models.IntegerChoices):
+class Difficulty(models.IntegerChoices):
     A1 = 1
     A2 = 2
     B1 = 3
@@ -28,9 +28,7 @@ class ComponentDifficulty(models.IntegerChoices):
 class Construction(models.Model):
     native_text = models.CharField(max_length=255)
     
-    normalized_text = models.TextField(
-        db_index=True
-    )
+    normalized_text = models.TextField(max_length=255)
 
     construction_type = models.CharField(max_length=255, choices=ConstructionType.choices)
 
@@ -39,8 +37,9 @@ class Construction(models.Model):
     notes = models.TextField(blank=True)
 
     difficulty = models.PositiveSmallIntegerField(
-        default=1,
-        choices=ComponentDifficulty.choices,
+        null=True,
+        blank=True,
+        choices=Difficulty.choices,
         db_index=True
     )
 
@@ -60,7 +59,7 @@ class Construction(models.Model):
 class ConstructionComponent(models.Model):
     
     # Parent construction that this component belongs to
-    construction = models.ForeignKey(
+    parent_construction = models.ForeignKey(
         Construction,
         on_delete=models.CASCADE,
         related_name="components"
@@ -70,22 +69,24 @@ class ConstructionComponent(models.Model):
         Lexeme,
         null=True,
         blank=True,
-        on_delete=models.CASCADE
+        on_delete=models.PROTECT
     )
 
     child_construction = models.ForeignKey(
         Construction,
         null=True,
         blank=True,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="parent_construction_components"
     )
 
+    # This allows a component to be ordered in a construction and also allows 
+    # for multiple instances of a component in construction.
     position = models.PositiveIntegerField()
 
     def __str__(self):
         target = self.lexeme or self.child_construction
-        return f"{self.construction} [{self.position}] - {target}"
+        return f"{self.parent_construction} [{self.position}] - {target}"
 
 
     class Meta:
@@ -93,7 +94,7 @@ class ConstructionComponent(models.Model):
 
         constraints = [
             models.UniqueConstraint(
-                fields=['construction', 'position'], 
+                fields=['parent_construction', 'position'], 
                 name='unique_component_position_per_construction'
             ),
             models.CheckConstraint(
@@ -141,12 +142,22 @@ class Highlight(models.Model):
     end_index = models.PositiveIntegerField()
 
     def clean(self):
-        if (
-            self.start_index is not None
-            and self.end_index is not None
-            and self.start_index >= self.end_index
-        ):
-            raise ValidationError("Invalid highlight range.")
+        super().clean()
+
+        if self.start_index >= self.end_index:
+            raise ValidationError(
+                "start_index must be less than end_index."
+            )
+
+        construction = self.construction_component.construction
+
+        text_length = len(construction.native_text)
+
+        if self.end_index > text_length:
+            raise ValidationError(
+                f"end_index must not exceed the construction text length "
+                f"({text_length})."
+            )
     
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -156,7 +167,7 @@ class Highlight(models.Model):
 # Flattened map linking constructions to all contained lexemes.
 # Enables fast context lookups for SRS review loops.
 
-class ConstructionLexeme(models.Model): # Add a script to populate this table when a new construction is created or updated.
+class FlattenedConstructionLexeme(models.Model): # Add a script to populate this table when a new construction is created or updated.
 
     construction = models.ForeignKey(
         Construction,

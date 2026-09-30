@@ -13,8 +13,8 @@ class Lexeme(models.Model):
         PRONOUN = 'PRONOUN', 'Pronoun';INTERROGATIVE = 'INTERROGATIVE', 'Interrogative' 
         OTHER = 'OTHER', 'Other'
 
-    surface_form = models.CharField(max_length=100, db_index=True)
-    base_consonants = models.CharField(max_length=100, db_index=True)
+    native_text = models.CharField(max_length=100, db_index=True)
+    normalized_text = models.CharField(max_length=100, db_index=True)
 
     pos = models.CharField(
         max_length=20,
@@ -40,7 +40,7 @@ class Lexeme(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.lemma
+        return self.surface_form
 
     class Meta:
         ordering = ['-created_at']

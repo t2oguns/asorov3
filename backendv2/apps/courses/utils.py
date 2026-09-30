@@ -2,7 +2,7 @@ import string
 import secrets
 import random
 from collections import defaultdict
-from apps.vocabulary.models import Construction, ConstructionLexeme, ConstructionType
+from apps.vocabulary.models import Construction, FlattenedConstructionLexeme, ConstructionType
 
 ALPHANUMERIC_CHARS = string.ascii_letters + string.digits
 

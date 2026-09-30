@@ -36,7 +36,7 @@ class SlideType(models.TextChoices):
     TEXT_RESPONSE = "TextResponse", "TextResponse"
     READ_PARAGRAPH = "ReadParagraph", "ReadParagraph"
 
-class PedagogicalRoleType(models.TextChoices):
+class LearningTargetType(models.TextChoices):
     Introduction = "Introduction", "Introduction"
     Reintroduction = "Reintroduction", "Reintroduction"
     Practice = "Practice", "Practice"
@@ -53,8 +53,8 @@ class SlideComponentRole(models.TextChoices):
 class Slide(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="slides")
 
-    pedagogical_role = models.CharField(
-        choices=PedagogicalRoleType.choices, 
+    learning_target = models.CharField(
+        choices=LearningTargetType.choices, 
         max_length=50,
     )
 
@@ -72,7 +72,7 @@ class Slide(models.Model):
         ordering = ["order"]
 
     def __str__(self):
-        return f"{self.learning_target}: {self.lesson.title} (#{self.order})"
+        return f"{self.pedagogical_role}: {self.lesson.title} (#{self.order})"
 
 
 # These models link the lesson slides to specific words, phrases, and sentences that are relevant for the exercises.

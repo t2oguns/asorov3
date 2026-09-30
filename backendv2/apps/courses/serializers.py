@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Unit, Lesson
+from .models import Unit, Lesson, Module
 from apps.exercises.serializers import SlideSerializer
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -7,17 +7,24 @@ class LessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "order", "difficulty", "group", "code", "slides"]
+        fields = ["id", "title", "description", "order", "difficulty", "module", "code", "slides"]
 
 class LessonDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = ["id", "title", "description", "order", "difficulty", "group", "code"]
+        fields = ["id", "title", "description", "order", "difficulty", "module", "code"]
 
-class UnitSerializer(serializers.ModelSerializer):
+class ModuleSerializer(serializers.ModelSerializer):
     lessons = LessonDetailSerializer(many=True, read_only=True)
 
     class Meta:
+        model = Module
+        fields = ["id", "unit", "title", "order", "lessons"]
+
+class UnitSerializer(serializers.ModelSerializer):
+    modules = ModuleSerializer(many=True, read_only=True)
+
+    class Meta:
         model = Unit
-        fields = ["id", "title", "description", "order", "lessons"]
+        fields = ["id", "title", "description", "order", "modules"]

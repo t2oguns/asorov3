@@ -1,2 +1,2 @@
-from .grammatical_construction import Construction, ConstructionComponent, ConstructionLexeme, ConstructionType, Highlight
+from .grammatical_construction import Construction, ConstructionComponent, FlattenedConstructionLexeme, ConstructionType, Highlight
 from .lexeme import Lexeme
