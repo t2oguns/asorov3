@@ -5,8 +5,14 @@ from apps.courses.utils import generate_unique_short_code
 from django.db import IntegrityError, transaction
 
 
-# Having lesson group allows concepts to be split up into multiple parts without
-# taking up lot's of screen real estate on the front end. Makes lessons more digestable
+class PUBLISH_STATUS(models.TextChoices):
+    DRAFT ="draft", "Draft"
+    GENERATED ="generated", "Generated"
+    IN_REVIEW ="in_review", "In Review"
+    PUBLISHED    ="published" "Published"
+    ARCHIVED ="archived", "Archived"
+
+
 class LessonGroup(models.Model):
     """
     Optional grouping of lessons inside a unit.
@@ -31,9 +37,18 @@ class Lesson(models.Model):
     title = models.CharField(max_length=200)
     code = models.CharField(max_length=LESSON_ID_LENGTH, unique=True, editable=False)
     description = models.TextField(blank=True)
+
+    difficulty = models.IntegerField(default=1)
+
+    publication_status = models.CharField(
+        max_length=50,
+        choices=PUBLISH_STATUS.choices,
+        default=PUBLISH_STATUS.DRAFT,
+    )
+
+    # Ordering for lessons within a group.
     order = models.PositiveIntegerField()
 
-    difficulty = models.IntegerField(default=1)  # New field to indicate lesson difficulty
 
     def __str__(self):
         return str("Lesson - " + self.title)

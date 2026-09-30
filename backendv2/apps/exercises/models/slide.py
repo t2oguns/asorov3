@@ -35,28 +35,44 @@ class SlideType(models.TextChoices):
     SKETCH = "Sketch", "Sketch"
     TEXT_RESPONSE = "TextResponse", "TextResponse"
     READ_PARAGRAPH = "ReadParagraph", "ReadParagraph"
-    RANDOM = "Random", "Random"
+
+class PedagogicalRoleType(models.TextChoices):
+    Introduction = "Introduction", "Introduction"
+    Reintroduction = "Reintroduction", "Reintroduction"
+    Practice = "Practice", "Practice"
+    Test = "Test", "Test"
+
+class SlideComponentRole(models.TextChoices):
+    PRIMARY = "primary", "Primary"
+    SECONDARY = "secondary", "Secondary"
+    DISTRACTOR = "distractor", "Distractor"
+    CONTEXT = "context", "Context"
 
 
 # The lesson slide model is a base model which can be improved by one of the slide type models to add augmentations
 class Slide(models.Model):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="slides")
-    
-    slide_type = models.CharField(
+
+    pedagogical_role = models.CharField(
+        choices=PedagogicalRoleType.choices, 
         max_length=50,
-        choices=SlideType.choices,
-        default=SlideType.INTRO
     )
 
-    order = models.PositiveIntegerField()
+    exercise_type = models.CharField(
+        max_length=50,
+        choices=SlideType.choices,
+        blank=True, 
+        null=True, 
+    )
 
-    # objects = SlideQuerySet.as_manager()
+
+    order = models.PositiveIntegerField()
 
     class Meta:
         ordering = ["order"]
 
     def __str__(self):
-        return f"{self.slide_type}: {self.lesson.title} (#{self.order})"
+        return f"{self.learning_target}: {self.lesson.title} (#{self.order})"
 
 
 # These models link the lesson slides to specific words, phrases, and sentences that are relevant for the exercises.
@@ -64,6 +80,11 @@ class SlideLexeme(models.Model):
     slide = models.ForeignKey(Slide, on_delete=models.CASCADE, related_name="slide_lexemes")
     lexeme = models.ForeignKey(Lexeme, on_delete=models.CASCADE)
     order = models.IntegerField(null=True, blank=True)  # if it's a multiple choice question, this can be used to order the options
+    role = models.CharField(
+        max_length=50,
+        choices=SlideComponentRole.choices,
+        default=SlideComponentRole.PRIMARY,
+    )
 
     class Meta:
         ordering = ["order"]
@@ -72,6 +93,12 @@ class SlideConstruction(models.Model):
     slide = models.ForeignKey(Slide, on_delete=models.CASCADE, related_name="slide_constructions")
     construction = models.ForeignKey(Construction, on_delete=models.CASCADE)
     order = models.IntegerField(null=True, blank=True)
+
+    role = models.CharField(
+            max_length=50,
+            choices=SlideComponentRole.choices,
+            default=SlideComponentRole.PRIMARY,
+        )
 
     class Meta:
         ordering = ["order"]

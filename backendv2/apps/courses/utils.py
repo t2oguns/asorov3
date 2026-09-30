@@ -1,6 +1,8 @@
 import string
 import secrets
-
+import random
+from collections import defaultdict
+from apps.vocabulary.models import Construction, ConstructionLexeme, ConstructionType
 
 ALPHANUMERIC_CHARS = string.ascii_letters + string.digits
 
@@ -20,3 +22,13 @@ def generate_unique_short_code(ModelClass, field_name, length=6):
 
         if not exists:
             return code
+
+class LessonCodeConverter:
+    regex = r"[A-Za-z0-9]{6}"  # match LESSON_ID_LENGTH
+
+    def to_python(self, value):
+        return value
+
+    def to_url(self, value):
+        return value
+
